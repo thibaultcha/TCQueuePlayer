@@ -28,11 +28,15 @@
     AVPlayerLayer *playerLayer = [AVPlayerLayer playerLayerWithPlayer:self.player];
     [playerLayer setVideoGravity:AVLayerVideoGravityResizeAspect];
     [playerLayer setFrame:CGRectMake(0,
-                                     0,
+                                     self.view.frame.size.height/2 - 100.0f,
                                      self.view.frame.size.width,
-                                     100.0f)];
+                                     200.0f)];
     
     UIButton *playButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    [playButton setFrame:CGRectMake(self.view.frame.size.width/2 - 50.0f,
+                                    30.0f,
+                                    100.0f,
+                                    50.0f)];
     [playButton setTitle:@"Play" forState:UIControlStateNormal];
     [playButton addTarget:self.player
                    action:@selector(play)
