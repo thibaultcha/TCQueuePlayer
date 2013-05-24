@@ -1,6 +1,6 @@
 ## TCQueuePlayer
 
-This is a library provides a wrapper class with (incoming) controls for AVQueuePlayer. It can be used to display ads before reading a video in an app.
+This library provides a wrapper class with (incoming) controls for AVQueuePlayer. It can be used to display ads before reading a video in an app.
 
 ## Licence
 ```text
