@@ -18,7 +18,10 @@
 - (void)setupControls;
 - (void)setupSlider;
 
+- (void)play;
+- (void)pause;
 - (CMTime)playerItemDuration;
+- (void)itemDidFinishPlaying:(NSNotification *)notification;
 
 - (void)addPlayerTimeObserver;
 - (void)removePlayerTimeObserver;
@@ -36,6 +39,9 @@
 - (void)dealloc
 {
     [self removePlayerTimeObserver];
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:AVPlayerItemDidPlayToEndTimeNotification
+                                                  object:self.player];
 }
 
 #pragma mark - Init
@@ -46,6 +52,13 @@
     self = [super initWithNibName:nil bundle:nil];
     if (self) {
         _player = [AVQueuePlayer queuePlayerWithItems:items];
+        
+        for (AVPlayerItem *item in self.player.items) {
+            [[NSNotificationCenter defaultCenter] addObserver:self
+                                                     selector:@selector(itemDidFinishPlaying:)
+                                                         name:AVPlayerItemDidPlayToEndTimeNotification
+                                                       object:item];
+        }
     }
     return self;
 }
@@ -95,7 +108,7 @@
                                     100.0f,
                                     50.0f)];
     [playButton setTitle:@"Play" forState:UIControlStateNormal];
-    [playButton addTarget:self.player
+    [playButton addTarget:self
                    action:@selector(play)
          forControlEvents:UIControlEventTouchUpInside];
     
@@ -105,7 +118,7 @@
                                      100.0f,
                                      50.0f)];
     [pauseButton setTitle:@"Pause" forState:UIControlStateNormal];
-    [pauseButton addTarget:self.player
+    [pauseButton addTarget:self
                     action:@selector(pause)
           forControlEvents:UIControlEventTouchUpInside];
     
@@ -134,12 +147,31 @@
 }
 
 
-#pragma mark - Player Specific Methods
+#pragma mark - Player Methods
 
+
+- (void)play
+{
+    [self.player play];
+}
+
+- (void)pause
+{
+    [self.player pause];
+}
 
 - (CMTime)playerItemDuration
 {
-    return([self.player.currentItem duration]);
+    return [self.player.currentItem duration];
+}
+
+- (void)itemDidFinishPlaying:(NSNotification *)notification
+{
+    if ([self.player.items count] == 1) {
+        [self dismissViewControllerAnimated:YES completion:^{
+            
+        }];
+    }
 }
 
 
@@ -171,7 +203,7 @@
 - (void)removePlayerTimeObserver
 {
     [self.player removeTimeObserver:self.playerTimeObserver];
-    self.playerTimeObserver = nil;
+    [self setPlayerTimeObserver:nil];
 }
 
 - (void)syncSlider
