@@ -18,6 +18,7 @@
 		2156B2F1174FAFEF00DD5FE2 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2156B2F0174FAFEF00DD5FE2 /* Default-568h@2x.png */; };
 		2156B302174FB04000DD5FE2 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2156B301174FB04000DD5FE2 /* ViewController.m */; };
 		2156B30A174FB51A00DD5FE2 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2156B309174FB51A00DD5FE2 /* AVFoundation.framework */; };
+		218ED45E1757986000E75ECE /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 218ED45D1757986000E75ECE /* CoreMedia.framework */; };
 		21B33FF9174FC11E009B9214 /* libTCQueuePlayer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 21B33FF6174FC106009B9214 /* libTCQueuePlayer.a */; };
 /* End PBXBuildFile section */
 
@@ -55,6 +56,7 @@
 		2156B300174FB04000DD5FE2 /* ViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		2156B301174FB04000DD5FE2 /* ViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		2156B309174FB51A00DD5FE2 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		218ED45D1757986000E75ECE /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		21B33FF1174FC106009B9214 /* TCQueuePlayer.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = TCQueuePlayer.xcodeproj; path = ../../TCQueuePlayer.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -63,6 +65,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				218ED45E1757986000E75ECE /* CoreMedia.framework in Frameworks */,
 				21B33FF9174FC11E009B9214 /* libTCQueuePlayer.a in Frameworks */,
 				2156B30A174FB51A00DD5FE2 /* AVFoundation.framework in Frameworks */,
 				2156B2DB174FAFEE00DD5FE2 /* UIKit.framework in Frameworks */,
@@ -94,6 +97,7 @@
 		2156B2D9174FAFEE00DD5FE2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				218ED45D1757986000E75ECE /* CoreMedia.framework */,
 				2156B309174FB51A00DD5FE2 /* AVFoundation.framework */,
 				2156B2DA174FAFEE00DD5FE2 /* UIKit.framework */,
 				2156B2DC174FAFEE00DD5FE2 /* Foundation.framework */,

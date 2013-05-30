@@ -6,18 +6,37 @@
 //  Copyright (c) 2013 thibaultCha. All rights reserved.
 //
 
-static const CGFloat kTimeIntervalSliderObserver = 0.1f;
-
 #import "TCQueuePlayerViewController.h"
 
 @interface TCQueuePlayerViewController ()
+{
+    float initialRate_;
+}
+@property (nonatomic, weak) id playerTimeObserver;
 @property (nonatomic, strong) UISlider *progressSlider;
 - (void)setupPlayer;
 - (void)setupControls;
+- (void)setupSlider;
+
+- (CMTime)playerItemDuration;
+
+- (void)addPlayerTimeObserver;
+- (void)removePlayerTimeObserver;
+- (void)syncSlider;
+- (void)didFinishScrollingProgressSlider:(id)sender;
+- (void)didBeginScrollingProgressBar:(id)sender;
 @end
 
 @implementation TCQueuePlayerViewController
 
+
+#pragma mark - Dealloc
+
+
+- (void)dealloc
+{
+    [self removePlayerTimeObserver];
+}
 
 #pragma mark - Init
 
@@ -43,6 +62,7 @@ static const CGFloat kTimeIntervalSliderObserver = 0.1f;
     
     [self setupPlayer];
     [self setupControls];
+    [self setupSlider];
 }
 
 - (void)didReceiveMemoryWarning
@@ -52,7 +72,7 @@ static const CGFloat kTimeIntervalSliderObserver = 0.1f;
 }
 
 
-#pragma mark - Controls setup
+#pragma mark - Controls Setup
 
 
 - (void)setupPlayer
@@ -63,12 +83,6 @@ static const CGFloat kTimeIntervalSliderObserver = 0.1f;
                                      self.view.frame.size.height/2 - 100.0f,
                                      self.view.frame.size.width,
                                      200.0f)];
-    
-    [self.player addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(kTimeIntervalSliderObserver, NSEC_PER_SEC)
-                                              queue:nil
-                                         usingBlock:^(CMTime time) {
-                                             
-                                         }];
     
     [self.view.layer addSublayer:playerLayer];
 }
@@ -95,24 +109,118 @@ static const CGFloat kTimeIntervalSliderObserver = 0.1f;
                     action:@selector(pause)
           forControlEvents:UIControlEventTouchUpInside];
     
-    double duration = CMTimeGetSeconds(self.player.currentItem.duration);
-    if (CMTIME_IS_INVALID(duration)) {
-        [NSException raise:@"Invalid time duration" format:@"Time duration is invalid"];
-    }
-#warning - TODO
+    [self.view addSubview:playButton];
+    [self.view addSubview:pauseButton];
+}
+
+- (void)setupSlider
+{
     _progressSlider = [[UISlider alloc] initWithFrame:CGRectMake(0,
                                                                  self.view.frame.size.height - 50.0f,
                                                                  self.view.frame.size.width,
                                                                  5.0f)];
-    [self.progressSlider setMaximumValue:duration];
+    [self.progressSlider addTarget:self
+                            action:@selector(didBeginScrollingProgressBar:)
+                  forControlEvents:UIControlEventTouchDown];
+    [self.progressSlider addTarget:self
+                            action:@selector(didFinishScrollingProgressSlider:)
+                  forControlEvents:UIControlEventTouchUpInside];
+    [self.progressSlider setMinimumValue:0];
     [self.progressSlider setValue:0];
-    [self.progressSlider setUserInteractionEnabled:NO];
     
+    [self addPlayerTimeObserver];
     
-    
-    [self.view addSubview:playButton];
-    [self.view addSubview:pauseButton];
     [self.view addSubview:self.progressSlider];
+}
+
+
+#pragma mark - Player Specific Methods
+
+
+- (CMTime)playerItemDuration
+{
+    return([self.player.currentItem duration]);
+}
+
+
+#pragma mark - Slider Management
+
+
+- (void)addPlayerTimeObserver
+{
+    double interval = .1f;
+    CMTime playerDuration = [self playerItemDuration];
+    if (CMTIME_IS_INVALID(playerDuration)) {
+        return;
+    }
+    double duration = CMTimeGetSeconds(playerDuration);
+    if (isfinite(duration)) {
+        CGFloat width = CGRectGetWidth(self.progressSlider.bounds);
+        interval = 0.5f * duration / width;
+    }
+    [self.progressSlider setMaximumValue:duration];
+    __weak typeof(self) weakSelf = self;
+    _playerTimeObserver = [self.player
+                           addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(interval, NSEC_PER_SEC)
+                           queue:nil
+                           usingBlock:^(CMTime time) {
+                               [weakSelf syncSlider];
+                           }];
+}
+
+- (void)removePlayerTimeObserver
+{
+    [self.player removeTimeObserver:self.playerTimeObserver];
+    self.playerTimeObserver = nil;
+}
+
+- (void)syncSlider
+{
+    CMTime playerDuration = [self playerItemDuration];
+    if (CMTIME_IS_INVALID(playerDuration)) {
+        return;
+    }
+    double duration = CMTimeGetSeconds(playerDuration);
+    if (isfinite(duration)) {
+        float minValue = [self.progressSlider minimumValue];
+        float maxValue = [self.progressSlider maximumValue];
+        double currentTime = CMTimeGetSeconds([self.player currentTime]);
+        
+        [self.progressSlider setValue:(maxValue - minValue) * currentTime / duration + minValue];
+    }
+}
+
+- (void)didBeginScrollingProgressBar:(id)sender
+{
+    initialRate_ = [self.player rate];
+    [self.player setRate:0.f];
+    
+    [self removePlayerTimeObserver];
+}
+
+- (void)didFinishScrollingProgressSlider:(id)sender
+{
+    if (self.playerTimeObserver == nil) {
+        CMTime playerDurection = [self playerItemDuration];
+        if (CMTIME_IS_INVALID(playerDurection)) {
+            return;
+        }
+        double duration = CMTimeGetSeconds(playerDurection);
+        if (isfinite(duration)) {
+            float minValue = [self.progressSlider minimumValue];
+            float maxValue = [self.progressSlider maximumValue];
+            double currentTime = [self.progressSlider value];
+            
+            double time = duration * (currentTime - minValue) / (maxValue - minValue);
+            [self.player seekToTime:CMTimeMakeWithSeconds(time, NSEC_PER_SEC)];
+            
+            [self addPlayerTimeObserver];
+        }
+    }
+    if (initialRate_) {
+        [self.player setRate:initialRate_];
+        initialRate_ = 0.f;
+    }
 }
 
 @end

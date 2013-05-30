@@ -50,8 +50,8 @@
 
 - (void)presentMoviesController
 {
-    NSString *urlString1 = [NSString stringWithFormat:@"%@/%@", NSTemporaryDirectory(), @"1.mp4"];
-    NSString *urlString2 = [NSString stringWithFormat:@"%@/%@", NSTemporaryDirectory(), @"2.mp4"];
+    NSString *urlString1 = [NSString stringWithFormat:@"%@%@", NSTemporaryDirectory(), @"1.mp4"];
+    NSString *urlString2 = [NSString stringWithFormat:@"%@%@", NSTemporaryDirectory(), @"2.mp4"];
     
     NSArray *videos = [[NSArray alloc] initWithObjects:
                        [AVPlayerItem playerItemWithURL:[[NSURL alloc] initFileURLWithPath:urlString1]],
