@@ -6,6 +6,9 @@
 //  Copyright (c) 2013 thibaultCha. All rights reserved.
 //
 
+static const CGFloat kControlsViewOpacity = 0.8f;
+static const CGFloat kControlsAnimationDuration = 0.2f;
+
 #import "TCQueuePlayerViewController.h"
 
 @interface TCQueuePlayerViewController ()
@@ -13,10 +16,12 @@
     float initialRate_;
 }
 @property (nonatomic, weak) id playerTimeObserver;
+@property (nonatomic, strong) UIView *topControlsView;
+@property (nonatomic, strong) UIView *bottomControlsView;
 @property (nonatomic, strong) UISlider *progressSlider;
-@property (nonatomic, strong) MPVolumeView *volumeSlider;
-- (void)setupPlayer;
 - (void)setupControls;
+- (void)setupPlayer;
+- (void)setupButtons;
 - (void)setupProgressSlider;
 - (void)setupAudioSlider;
 
@@ -30,6 +35,8 @@
 - (void)syncSlider;
 - (void)didFinishScrollingProgressSlider:(id)sender;
 - (void)didBeginScrollingProgressBar:(id)sender;
+
+- (void)didTapControlsView:(UIGestureRecognizer *)gesture;
 @end
 
 @implementation TCQueuePlayerViewController
@@ -45,6 +52,7 @@
                                                     name:AVPlayerItemDidPlayToEndTimeNotification
                                                   object:self.player];
 }
+
 
 #pragma mark - Init
 
@@ -77,8 +85,7 @@
     
     [self setupPlayer];
     [self setupControls];
-    [self setupProgressSlider];
-    [self setupAudioSlider];
+    [self setState:TCQueuePlayerControlsStateVisible];
 }
 
 - (void)didReceiveMemoryWarning
@@ -105,35 +112,66 @@
 
 - (void)setupControls
 {
+    _topControlsView = [[UIView alloc] initWithFrame:CGRectMake(0,
+                                                                0,
+                                                                self.view.frame.size.width,
+                                                                50.0f)];
+    [self.topControlsView setBackgroundColor:[UIColor darkGrayColor]];
+    [self.topControlsView setAlpha:0];
+    
+    _bottomControlsView = [[UIView alloc] initWithFrame:CGRectMake(0,
+                                                                   self.view.frame.size.height - 50.0f,
+                                                                   self.view.frame.size.width,
+                                                                   50.0f)];
+    [self.bottomControlsView setBackgroundColor:[UIColor darkGrayColor]];
+    [self.topControlsView setAlpha:0];
+    
+    UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc]
+                                           initWithTarget:self
+                                                   action:@selector(didTapControlsView:)];
+    [tapGesture setNumberOfTapsRequired:1];
+    [tapGesture setNumberOfTouchesRequired:1];
+    
+    [self.view addGestureRecognizer:tapGesture];
+    [self.view addSubview:self.topControlsView];
+    [self.view addSubview:self.bottomControlsView]; 
+    
+    [self setupButtons];
+    [self setupProgressSlider];
+    [self setupAudioSlider];
+}
+
+- (void)setupButtons
+{
     UIButton *playButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-    [playButton setFrame:CGRectMake((self.view.frame.size.width/3 - 50.0f) * 1,
-                                    30.0f,
-                                    100.0f,
-                                    50.0f)];
+    [playButton setFrame:CGRectMake((self.topControlsView.frame.size.width/3 - 50.0f) * 1,
+                                     0,
+                                     100.0f,
+                                     50.0f)];
     [playButton setTitle:@"Play" forState:UIControlStateNormal];
     [playButton addTarget:self
                    action:@selector(play)
          forControlEvents:UIControlEventTouchUpInside];
     
     UIButton *pauseButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-    [pauseButton setFrame:CGRectMake((self.view.frame.size.width/3 - 50.0f) * 3,
-                                     30.0f,
-                                     100.0f,
-                                     50.0f)];
+    [pauseButton setFrame:CGRectMake((self.topControlsView.frame.size.width/3 - 50.0f) * 3,
+                                      0,
+                                      100.0f,
+                                      50.0f)];
     [pauseButton setTitle:@"Pause" forState:UIControlStateNormal];
     [pauseButton addTarget:self
                     action:@selector(pause)
           forControlEvents:UIControlEventTouchUpInside];
     
     
-    [self.view addSubview:playButton];
-    [self.view addSubview:pauseButton];
+    [self.topControlsView addSubview:playButton];
+    [self.topControlsView addSubview:pauseButton];
 }
 
 - (void)setupProgressSlider
 {
     _progressSlider = [[UISlider alloc] initWithFrame:CGRectMake(0,
-                                                                 self.view.frame.size.height - 50.0f,
+                                                                 self.bottomControlsView.frame.size.height/2 - 5.0f,
                                                                  self.view.frame.size.width,
                                                                  5.0f)];
     [self.progressSlider addTarget:self
@@ -147,19 +185,61 @@
     
     [self addPlayerTimeObserver];
     
-    [self.view addSubview:self.progressSlider];
+    [self.bottomControlsView addSubview:self.progressSlider];
 }
 
 - (void)setupAudioSlider
 {
-    _volumeSlider = [[MPVolumeView alloc] initWithFrame:CGRectMake(0,
-                                                                   90.0f,
-                                                                   self.view.frame.size.width,
-                                                                   20.0f)];
-    [self.volumeSlider setShowsVolumeSlider:YES];
-    [self.volumeSlider setShowsRouteButton:YES];
+    MPVolumeView *volumeSlider = [[MPVolumeView alloc] initWithFrame:CGRectMake(0,
+                                                                                90.0f,
+                                                                                self.view.frame.size.width,
+                                                                                20.0f)];
+    [volumeSlider setShowsVolumeSlider:YES];
+    [volumeSlider setShowsRouteButton:YES];
     
-    [self.view addSubview:self.volumeSlider];
+    [self.topControlsView addSubview:volumeSlider];
+}
+
+
+#pragma mark - Public methods
+
+
+- (void)animateControlsToState:(TCQueuePlayerControlsState)state
+{
+    CGFloat opacity = 0;
+    if (state == TCQueuePlayerControlsStateVisible) {
+        opacity = kControlsViewOpacity;
+    }
+    
+    [UIView animateWithDuration:kControlsAnimationDuration
+                          delay:0
+                        options:UIViewAnimationOptionTransitionNone
+                     animations:^{
+                         [self.topControlsView setAlpha:opacity];
+                         [self.bottomControlsView setAlpha:opacity];
+                     }
+                     completion:^(BOOL finished) {
+                         
+                     }];
+}
+
+
+#pragma mark - Setters
+
+
+- (void)setState:(TCQueuePlayerControlsState)state
+{
+    _state = state;
+    [self animateControlsToState:state];
+}
+
+
+#pragma mark - Gesture Management
+
+
+- (void)didTapControlsView:(UIGestureRecognizer *)gesture
+{
+    [self setState:!self.state];
 }
 
 
