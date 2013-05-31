@@ -16,26 +16,30 @@ static const CGFloat kControlsAnimationDuration = 0.2f;
     float initialRate_;
 }
 @property (nonatomic, weak) id playerTimeObserver;
+@property (nonatomic, strong) AVPlayerLayer *playerLayer;
 @property (nonatomic, strong) UIView *topControlsView;
 @property (nonatomic, strong) UIView *bottomControlsView;
+@property (nonatomic, strong) UIButton *playButton;
+@property (nonatomic, strong) UIButton *pauseButton;
 @property (nonatomic, strong) UISlider *progressSlider;
+// View layout
 - (void)setupControls;
 - (void)setupPlayer;
 - (void)setupButtons;
 - (void)setupProgressSlider;
 - (void)setupAudioSlider;
-
+// Player
 - (void)play;
 - (void)pause;
 - (CMTime)playerItemDuration;
 - (void)itemDidFinishPlaying:(NSNotification *)notification;
-
+// Utilities
 - (void)addPlayerTimeObserver;
 - (void)removePlayerTimeObserver;
 - (void)syncSlider;
 - (void)didFinishScrollingProgressSlider:(id)sender;
 - (void)didBeginScrollingProgressBar:(id)sender;
-
+// Gesture
 - (void)didTapControlsView:(UIGestureRecognizer *)gesture;
 @end
 
@@ -60,7 +64,7 @@ static const CGFloat kControlsAnimationDuration = 0.2f;
 - (id)initWithItems:(NSArray *)items
 {
     self = [super initWithNibName:nil bundle:nil];
-    if (self) {
+    if (self) {        
         _player = [AVQueuePlayer queuePlayerWithItems:items];
         
         for (AVPlayerItem *item in self.player.items) {
@@ -82,6 +86,7 @@ static const CGFloat kControlsAnimationDuration = 0.2f;
     [super viewDidLoad];
     
     [self.view setBackgroundColor:[UIColor blackColor]];
+    [self.view setAutoresizingMask:UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight];
     
     [self setupPlayer];
     [self setupControls];
@@ -94,20 +99,29 @@ static const CGFloat kControlsAnimationDuration = 0.2f;
     [self setPlayer:nil];
 }
 
+- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
+{
+    [super willAnimateRotationToInterfaceOrientation:toInterfaceOrientation duration:duration];
+    [self.playerLayer setFrame:CGRectMake(0,
+                                          self.view.bounds.size.height/2 - self.view.bounds.size.height/2,
+                                          self.view.bounds.size.width,
+                                          self.view.bounds.size.height)];
+}
+
 
 #pragma mark - Controls Setup
 
 
 - (void)setupPlayer
 {
-    AVPlayerLayer *playerLayer = [AVPlayerLayer playerLayerWithPlayer:self.player];
-    [playerLayer setVideoGravity:AVLayerVideoGravityResizeAspect];
-    [playerLayer setFrame:CGRectMake(0,
-                                     self.view.frame.size.height/2 - 100.0f,
-                                     self.view.frame.size.width,
-                                     200.0f)];
-    
-    [self.view.layer addSublayer:playerLayer];
+    _playerLayer = [AVPlayerLayer playerLayerWithPlayer:self.player];
+    [self.playerLayer setVideoGravity:AVLayerVideoGravityResizeAspect];
+    [self.playerLayer setFrame:CGRectMake(0,
+                                          self.view.bounds.size.height/2 - self.view.bounds.size.height/2,
+                                          self.view.bounds.size.width,
+                                          self.view.bounds.size.height)];
+
+    [self.view.layer addSublayer:self.playerLayer];
 }
 
 - (void)setupControls
@@ -116,15 +130,15 @@ static const CGFloat kControlsAnimationDuration = 0.2f;
                                                                 0,
                                                                 self.view.frame.size.width,
                                                                 50.0f)];
+    [self.topControlsView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
     [self.topControlsView setBackgroundColor:[UIColor darkGrayColor]];
-    [self.topControlsView setAlpha:0];
     
     _bottomControlsView = [[UIView alloc] initWithFrame:CGRectMake(0,
                                                                    self.view.frame.size.height - 50.0f,
                                                                    self.view.frame.size.width,
                                                                    50.0f)];
+    [self.bottomControlsView setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
     [self.bottomControlsView setBackgroundColor:[UIColor darkGrayColor]];
-    [self.topControlsView setAlpha:0];
     
     UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc]
                                            initWithTarget:self
@@ -143,29 +157,29 @@ static const CGFloat kControlsAnimationDuration = 0.2f;
 
 - (void)setupButtons
 {
-    UIButton *playButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-    [playButton setFrame:CGRectMake((self.topControlsView.frame.size.width/3 - 50.0f) * 1,
-                                     0,
-                                     100.0f,
-                                     50.0f)];
-    [playButton setTitle:@"Play" forState:UIControlStateNormal];
-    [playButton addTarget:self
+    _playButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    [self.playButton setFrame:CGRectMake(10.0f,
+                                         0,
+                                         100.0f,
+                                         50.0f)];
+    [self.playButton setAutoresizingMask:UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleRightMargin];
+    [self.playButton setTitle:@"Play" forState:UIControlStateNormal];
+    [self.playButton addTarget:self
                    action:@selector(play)
          forControlEvents:UIControlEventTouchUpInside];
     
-    UIButton *pauseButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-    [pauseButton setFrame:CGRectMake((self.topControlsView.frame.size.width/3 - 50.0f) * 3,
-                                      0,
-                                      100.0f,
-                                      50.0f)];
-    [pauseButton setTitle:@"Pause" forState:UIControlStateNormal];
-    [pauseButton addTarget:self
+    _pauseButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    [self.pauseButton setFrame:self.playButton.frame];
+    [self.pauseButton setAutoresizingMask:UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleRightMargin];
+    [self.pauseButton setTitle:@"Pause" forState:UIControlStateNormal];
+    [self.pauseButton addTarget:self
                     action:@selector(pause)
           forControlEvents:UIControlEventTouchUpInside];
     
-    
-    [self.topControlsView addSubview:playButton];
-    [self.topControlsView addSubview:pauseButton];
+    [self.playButton setHidden:NO];
+    [self.pauseButton setHidden:YES];
+    [self.topControlsView addSubview:self.playButton];
+    [self.topControlsView addSubview:self.pauseButton];
 }
 
 - (void)setupProgressSlider
@@ -174,6 +188,7 @@ static const CGFloat kControlsAnimationDuration = 0.2f;
                                                                  self.bottomControlsView.frame.size.height/2 - 5.0f,
                                                                  self.view.frame.size.width,
                                                                  5.0f)];
+    [self.progressSlider setAutoresizingMask:UIViewAutoresizingFlexibleLeftMargin];
     [self.progressSlider addTarget:self
                             action:@selector(didBeginScrollingProgressBar:)
                   forControlEvents:UIControlEventTouchDown];
@@ -190,10 +205,11 @@ static const CGFloat kControlsAnimationDuration = 0.2f;
 
 - (void)setupAudioSlider
 {
-    MPVolumeView *volumeSlider = [[MPVolumeView alloc] initWithFrame:CGRectMake(0,
-                                                                                90.0f,
-                                                                                self.view.frame.size.width,
+    MPVolumeView *volumeSlider = [[MPVolumeView alloc] initWithFrame:CGRectMake(120.0f,
+                                                                                self.topControlsView.frame.size.height/2 - 10.0f,
+                                                                                200.0f,
                                                                                 20.0f)];
+    [volumeSlider setAutoresizingMask:UIViewAutoresizingFlexibleLeftMargin];
     [volumeSlider setShowsVolumeSlider:YES];
     [volumeSlider setShowsRouteButton:YES];
     
@@ -207,20 +223,24 @@ static const CGFloat kControlsAnimationDuration = 0.2f;
 - (void)animateControlsToState:(TCQueuePlayerControlsState)state
 {
     CGFloat opacity = 0;
+    CGFloat alpha = 0;
     if (state == TCQueuePlayerControlsStateVisible) {
         opacity = kControlsViewOpacity;
+        alpha =1.0f;
     }
     
     [UIView animateWithDuration:kControlsAnimationDuration
                           delay:0
                         options:UIViewAnimationOptionTransitionNone
                      animations:^{
-                         [self.topControlsView setAlpha:opacity];
-                         [self.bottomControlsView setAlpha:opacity];
+                         [self.topControlsView setBackgroundColor
+                          :[[UIColor blackColor] colorWithAlphaComponent:opacity]];
+                         [self.bottomControlsView setBackgroundColor
+                          :[[UIColor blackColor] colorWithAlphaComponent:opacity]];
+                         [self.topControlsView setAlpha:alpha];
+                         [self.bottomControlsView setAlpha:alpha];
                      }
-                     completion:^(BOOL finished) {
-                         
-                     }];
+                     completion:nil];
 }
 
 
@@ -248,11 +268,17 @@ static const CGFloat kControlsAnimationDuration = 0.2f;
 
 - (void)play
 {
+    [self.playButton setHidden:YES];
+    [self.pauseButton setHidden:NO];
+    
     [self.player play];
 }
 
 - (void)pause
 {
+    [self.pauseButton setHidden:YES];
+    [self.playButton setHidden:NO];
+    
     [self.player pause];
 }
 

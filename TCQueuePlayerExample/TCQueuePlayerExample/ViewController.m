@@ -34,6 +34,7 @@
                                     50.0f,
                                     200.0f,
                                     100.0f)];
+    [showPlayer setAutoresizingMask:UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleRightMargin];
     [showPlayer setTitle:@"Show player" forState:UIControlStateNormal];
     [showPlayer addTarget:self
                    action:@selector(presentMoviesController)
