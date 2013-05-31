@@ -14,7 +14,7 @@
 }
 @property (nonatomic, weak) id playerTimeObserver;
 @property (nonatomic, strong) UISlider *progressSlider;
-@property (nonatomic, strong) UISlider *volumeSlider;
+@property (nonatomic, strong) MPVolumeView *volumeSlider;
 - (void)setupPlayer;
 - (void)setupControls;
 - (void)setupProgressSlider;
@@ -30,8 +30,6 @@
 - (void)syncSlider;
 - (void)didFinishScrollingProgressSlider:(id)sender;
 - (void)didBeginScrollingProgressBar:(id)sender;
-
-- (void)didChangeVolumeSliderValue:(id)sender;
 @end
 
 @implementation TCQueuePlayerViewController
@@ -154,17 +152,12 @@
 
 - (void)setupAudioSlider
 {
-    float systemVolume = [[AVAudioSession sharedInstance] outputVolume];
-    _volumeSlider = [[UISlider alloc] initWithFrame:CGRectMake(0,
-                                                               70.0f,
-                                                               self.view.frame.size.width,
-                                                               5.0f)];
-    [self.volumeSlider setMinimumValue:0];
-    [self.volumeSlider setMaximumValue:1.0f];
-    [self.volumeSlider setValue:systemVolume];
-    [self.volumeSlider addTarget:self
-                          action:@selector(didChangeVolumeSliderValue:)
-                forControlEvents:UIControlEventValueChanged];
+    _volumeSlider = [[MPVolumeView alloc] initWithFrame:CGRectMake(0,
+                                                                   90.0f,
+                                                                   self.view.frame.size.width,
+                                                                   20.0f)];
+    [self.volumeSlider setShowsVolumeSlider:YES];
+    [self.volumeSlider setShowsRouteButton:YES];
     
     [self.view addSubview:self.volumeSlider];
 }
@@ -276,29 +269,6 @@
         [self.player setRate:initialRate_];
         initialRate_ = 0.f;
     }
-}
-
-
-#pragma mark - Volume Slider Management
-
-
-- (void)didChangeVolumeSliderValue:(id)sender
-{
-    NSArray *audioTracks = [self.player.currentItem tracks];
-    NSMutableArray *allAudioParams = [NSMutableArray array];
-    
-    for (AVAssetTrack *track in audioTracks) {
-        AVMutableAudioMixInputParameters *audioInputParams
-        = [AVMutableAudioMixInputParameters audioMixInputParameters];
-        [audioInputParams setVolume:self.volumeSlider.value atTime:kCMTimeZero];
-        [audioInputParams setTrackID:[track trackID]];
-        [allAudioParams addObject:audioInputParams];
-    }
-    
-    AVMutableAudioMix *audioMix = [AVMutableAudioMix audioMix];
-    [audioMix setInputParameters:allAudioParams];
-    
-    [self.player.currentItem setAudioMix:audioMix];
 }
 
 @end

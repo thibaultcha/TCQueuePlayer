@@ -20,6 +20,8 @@
 		2156B30A174FB51A00DD5FE2 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2156B309174FB51A00DD5FE2 /* AVFoundation.framework */; };
 		219D5BB31758930E007870EC /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 219D5BB21758930E007870EC /* CoreMedia.framework */; };
 		219D5BB51758A3DE007870EC /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 219D5BB41758A3DE007870EC /* MediaPlayer.framework */; };
+		219D5BC11758B055007870EC /* sample1.m4v in Resources */ = {isa = PBXBuildFile; fileRef = 219D5BBF1758B055007870EC /* sample1.m4v */; };
+		219D5BC21758B055007870EC /* sample2.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 219D5BC01758B055007870EC /* sample2.mp4 */; };
 		21B33FF9174FC11E009B9214 /* libTCQueuePlayer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 21B33FF6174FC106009B9214 /* libTCQueuePlayer.a */; };
 /* End PBXBuildFile section */
 
@@ -59,6 +61,8 @@
 		2156B309174FB51A00DD5FE2 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		219D5BB21758930E007870EC /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		219D5BB41758A3DE007870EC /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
+		219D5BBF1758B055007870EC /* sample1.m4v */ = {isa = PBXFileReference; lastKnownFileType = file; path = sample1.m4v; sourceTree = SOURCE_ROOT; };
+		219D5BC01758B055007870EC /* sample2.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = sample2.mp4; sourceTree = SOURCE_ROOT; };
 		21B33FF1174FC106009B9214 /* TCQueuePlayer.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = TCQueuePlayer.xcodeproj; path = ../../TCQueuePlayer.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -117,6 +121,7 @@
 				2156B2EA174FAFEF00DD5FE2 /* TCAppDelegate.m */,
 				2156B300174FB04000DD5FE2 /* ViewController.h */,
 				2156B301174FB04000DD5FE2 /* ViewController.m */,
+				219D5BBE1758B044007870EC /* Resources */,
 				2156B2E1174FAFEE00DD5FE2 /* Supporting Files */,
 				21B33FF1174FC106009B9214 /* TCQueuePlayer.xcodeproj */,
 			);
@@ -135,6 +140,15 @@
 				2156B2F0174FAFEF00DD5FE2 /* Default-568h@2x.png */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		219D5BBE1758B044007870EC /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				219D5BBF1758B055007870EC /* sample1.m4v */,
+				219D5BC01758B055007870EC /* sample2.mp4 */,
+			);
+			name = Resources;
 			sourceTree = "<group>";
 		};
 		21B33FF2174FC106009B9214 /* Products */ = {
@@ -218,6 +232,8 @@
 				2156B2ED174FAFEF00DD5FE2 /* Default.png in Resources */,
 				2156B2EF174FAFEF00DD5FE2 /* Default@2x.png in Resources */,
 				2156B2F1174FAFEF00DD5FE2 /* Default-568h@2x.png in Resources */,
+				219D5BC11758B055007870EC /* sample1.m4v in Resources */,
+				219D5BC21758B055007870EC /* sample2.mp4 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

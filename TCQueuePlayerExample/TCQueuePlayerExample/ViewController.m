@@ -45,13 +45,12 @@
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
-
 }
 
 - (void)presentMoviesController
 {
-    NSString *urlString1 = [NSString stringWithFormat:@"%@%@", NSTemporaryDirectory(), @"1.mp4"];
-    NSString *urlString2 = [NSString stringWithFormat:@"%@%@", NSTemporaryDirectory(), @"2.mp4"];
+    NSString *urlString1 = [[NSBundle mainBundle] pathForResource:@"sample2" ofType:@"mp4"];
+    NSString *urlString2 = [[NSBundle mainBundle] pathForResource:@"sample1" ofType:@"m4v"];
     
     NSArray *videos = [[NSArray alloc] initWithObjects:
                        [AVPlayerItem playerItemWithURL:[[NSURL alloc] initFileURLWithPath:urlString1]],
