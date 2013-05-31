@@ -11,6 +11,7 @@
 		2156B2C7174FA7F800DD5FE2 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2156B2C6174FA7F800DD5FE2 /* AVFoundation.framework */; };
 		2156B2CA174FA81A00DD5FE2 /* TCQueuePlayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2156B2C9174FA81A00DD5FE2 /* TCQueuePlayerViewController.m */; };
 		2156B307174FB45400DD5FE2 /* TCQueuePlayerViewController.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2156B2C8174FA81A00DD5FE2 /* TCQueuePlayerViewController.h */; };
+		219D5BB117589269007870EC /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 219D5BB017589269007870EC /* CoreMedia.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -33,6 +34,7 @@
 		2156B2C6174FA7F800DD5FE2 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		2156B2C8174FA81A00DD5FE2 /* TCQueuePlayerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TCQueuePlayerViewController.h; sourceTree = "<group>"; };
 		2156B2C9174FA81A00DD5FE2 /* TCQueuePlayerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TCQueuePlayerViewController.m; sourceTree = "<group>"; };
+		219D5BB017589269007870EC /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -40,6 +42,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				219D5BB117589269007870EC /* CoreMedia.framework in Frameworks */,
 				2156B2C7174FA7F800DD5FE2 /* AVFoundation.framework in Frameworks */,
 				2156B2B9174FA7A600DD5FE2 /* Foundation.framework in Frameworks */,
 			);
@@ -68,6 +71,7 @@
 		2156B2B7174FA7A600DD5FE2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				219D5BB017589269007870EC /* CoreMedia.framework */,
 				2156B2C6174FA7F800DD5FE2 /* AVFoundation.framework */,
 				2156B2B8174FA7A600DD5FE2 /* Foundation.framework */,
 			);

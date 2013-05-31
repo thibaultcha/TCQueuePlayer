@@ -14,9 +14,11 @@
 }
 @property (nonatomic, weak) id playerTimeObserver;
 @property (nonatomic, strong) UISlider *progressSlider;
+@property (nonatomic, strong) UISlider *volumeSlider;
 - (void)setupPlayer;
 - (void)setupControls;
-- (void)setupSlider;
+- (void)setupProgressSlider;
+- (void)setupAudioSlider;
 
 - (void)play;
 - (void)pause;
@@ -28,6 +30,8 @@
 - (void)syncSlider;
 - (void)didFinishScrollingProgressSlider:(id)sender;
 - (void)didBeginScrollingProgressBar:(id)sender;
+
+- (void)didChangeVolumeSliderValue:(id)sender;
 @end
 
 @implementation TCQueuePlayerViewController
@@ -75,7 +79,8 @@
     
     [self setupPlayer];
     [self setupControls];
-    [self setupSlider];
+    [self setupProgressSlider];
+    [self setupAudioSlider];
 }
 
 - (void)didReceiveMemoryWarning
@@ -122,11 +127,12 @@
                     action:@selector(pause)
           forControlEvents:UIControlEventTouchUpInside];
     
+    
     [self.view addSubview:playButton];
     [self.view addSubview:pauseButton];
 }
 
-- (void)setupSlider
+- (void)setupProgressSlider
 {
     _progressSlider = [[UISlider alloc] initWithFrame:CGRectMake(0,
                                                                  self.view.frame.size.height - 50.0f,
@@ -146,8 +152,25 @@
     [self.view addSubview:self.progressSlider];
 }
 
+- (void)setupAudioSlider
+{
+    float systemVolume = [[AVAudioSession sharedInstance] outputVolume];
+    _volumeSlider = [[UISlider alloc] initWithFrame:CGRectMake(0,
+                                                               70.0f,
+                                                               self.view.frame.size.width,
+                                                               5.0f)];
+    [self.volumeSlider setMinimumValue:0];
+    [self.volumeSlider setMaximumValue:1.0f];
+    [self.volumeSlider setValue:systemVolume];
+    [self.volumeSlider addTarget:self
+                          action:@selector(didChangeVolumeSliderValue:)
+                forControlEvents:UIControlEventValueChanged];
+    
+    [self.view addSubview:self.volumeSlider];
+}
 
-#pragma mark - Player Methods
+
+#pragma mark - AVPlayer Methods
 
 
 - (void)play
@@ -175,7 +198,7 @@
 }
 
 
-#pragma mark - Slider Management
+#pragma mark - Progress Slider Management
 
 
 - (void)addPlayerTimeObserver
@@ -253,6 +276,29 @@
         [self.player setRate:initialRate_];
         initialRate_ = 0.f;
     }
+}
+
+
+#pragma mark - Volume Slider Management
+
+
+- (void)didChangeVolumeSliderValue:(id)sender
+{
+    NSArray *audioTracks = [self.player.currentItem tracks];
+    NSMutableArray *allAudioParams = [NSMutableArray array];
+    
+    for (AVAssetTrack *track in audioTracks) {
+        AVMutableAudioMixInputParameters *audioInputParams
+        = [AVMutableAudioMixInputParameters audioMixInputParameters];
+        [audioInputParams setVolume:self.volumeSlider.value atTime:kCMTimeZero];
+        [audioInputParams setTrackID:[track trackID]];
+        [allAudioParams addObject:audioInputParams];
+    }
+    
+    AVMutableAudioMix *audioMix = [AVMutableAudioMix audioMix];
+    [audioMix setInputParameters:allAudioParams];
+    
+    [self.player.currentItem setAudioMix:audioMix];
 }
 
 @end
