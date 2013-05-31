@@ -99,7 +99,8 @@ static const CGFloat kControlsAnimationDuration = 0.2f;
     [self setPlayer:nil];
 }
 
-- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
+- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
+                                         duration:(NSTimeInterval)duration
 {
     [super willAnimateRotationToInterfaceOrientation:toInterfaceOrientation duration:duration];
     [self.playerLayer setFrame:CGRectMake(0,
@@ -316,10 +317,10 @@ static const CGFloat kControlsAnimationDuration = 0.2f;
     __weak typeof(self) weakSelf = self;
     _playerTimeObserver = [self.player
                            addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(interval, NSEC_PER_SEC)
-                           queue:nil
-                           usingBlock:^(CMTime time) {
-                               [weakSelf syncSlider];
-                           }];
+                                                        queue:nil
+                                                   usingBlock:^(CMTime time) {
+                                                       [weakSelf syncSlider];
+                                                   }];
 }
 
 - (void)removePlayerTimeObserver
